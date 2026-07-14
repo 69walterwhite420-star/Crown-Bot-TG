@@ -240,10 +240,13 @@ async function main(): Promise<void> {
     await handleLinkResult(ctx, ctx.from.id, ctx.message.web_app_data.data);
   });
 
-  bot.on("message:text", async (ctx) => {
-    if (ctx.chat.type !== "private" || !ctx.from) return;
+  bot.on("message:text", async (ctx, next) => {
+    // Only the pasted JSON of a link result is ours; everything else —
+    // commands included — must flow on to the handlers registered later.
     const text = ctx.message.text.trim();
-    if (!text.startsWith("{")) return; // commands and chatter are not ours
+    if (ctx.chat.type !== "private" || !ctx.from || !text.startsWith("{")) {
+      return next();
+    }
     await handleLinkResult(ctx, ctx.from.id, text);
   });
 
