@@ -95,6 +95,9 @@ export class Service {
       threshold: args.threshold,
       createdAt: now,
     });
+    // The member's door: a request-to-join link the bot can approve on.
+    const invite = await this.deps.telegram.createInviteLink(args.tgChatId);
+    db.setInviteLink(channelId, invite);
     return { channelId, deepLink: `https://t.me/${policy.botUsername}?start=${hex(channelId)}` };
   }
 

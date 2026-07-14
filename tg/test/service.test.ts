@@ -50,6 +50,11 @@ class FakeTelegram {
   messages: { chatId: bigint; text: string }[] = [];
   approved: { chatId: bigint; userId: bigint }[] = [];
   kicked: { chatId: bigint; userId: bigint }[] = [];
+  inviteLinks = 0;
+  createInviteLink(chatId: bigint): Promise<string> {
+    this.inviteLinks += 1;
+    return Promise.resolve(`https://t.me/+invite${chatId}`);
+  }
   sendMessage(chatId: bigint, text: string): Promise<void> {
     this.messages.push({ chatId, text });
     return Promise.resolve();

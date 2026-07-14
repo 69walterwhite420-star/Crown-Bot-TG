@@ -6,7 +6,7 @@
 
 import Database from "better-sqlite3";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const MIGRATIONS: Record<number, string> = {
   1: `
@@ -48,6 +48,9 @@ const MIGRATIONS: Record<number, string> = {
       PRIMARY KEY (channel_id, telegram_id)
     );
   `,
+  // The channel's own request-to-join invite link, created by the bot at
+  // setup: the deep link leads to the bot, the invite link to the channel.
+  2: `ALTER TABLE channels ADD COLUMN invite_link TEXT;`,
 };
 
 export interface ChannelRow {
@@ -62,6 +65,7 @@ export interface ChannelRow {
   threshold: bigint;
   createdAt: bigint;
   uncollectedNotifiedAt: bigint | null;
+  inviteLink: string | null;
 }
 
 export interface BindingRow {
@@ -101,6 +105,7 @@ function channelOf(row: Raw): ChannelRow {
     createdAt: BigInt(row.created_at),
     uncollectedNotifiedAt:
       row.uncollected_notified_at === null ? null : BigInt(row.uncollected_notified_at),
+    inviteLink: row.invite_link ?? null,
   };
 }
 
@@ -155,7 +160,13 @@ export class BotDb {
 
   // ---- channels ---------------------------------------------------------
 
-  insertChannel(channel: Omit<ChannelRow, "uncollectedNotifiedAt">): void {
+  setInviteLink(channelId: Uint8Array, link: string): void {
+    this.db
+      .prepare("UPDATE channels SET invite_link = ? WHERE channel_id = ?")
+      .run(link, Buffer.from(channelId));
+  }
+
+  insertChannel(channel: Omit<ChannelRow, "uncollectedNotifiedAt" | "inviteLink">): void {
     this.db
       .prepare(
         `INSERT INTO channels (channel_id, tg_chat_id, owner_wallet, owner_telegram_id,

@@ -6,4 +6,6 @@ export interface TelegramApi {
   sendMessage(chatId: bigint, text: string): Promise<void>;
   approveJoinRequest(chatId: bigint, userId: bigint): Promise<void>;
   kickMember(chatId: bigint, userId: bigint): Promise<void>;
+  /** A request-to-join invite link of the channel — the member's door. */
+  createInviteLink(chatId: bigint): Promise<string>;
 }

@@ -74,6 +74,13 @@ async function main(): Promise<void> {
         await bot.api.banChatMember(Number(chatId), Number(userId));
         await bot.api.unbanChatMember(Number(chatId), Number(userId));
       },
+      createInviteLink: async (chatId) => {
+        const link = await bot.api.createChatInviteLink(Number(chatId), {
+          creates_join_request: true,
+          name: "crown-gate",
+        });
+        return link.invite_link;
+      },
     },
     sources,
     challenges,
@@ -158,8 +165,9 @@ async function main(): Promise<void> {
       (channel.price > 0n
         ? `Подписка: ${channel.price} minor USDC за ${channel.period} сек.\n`
         : "") +
-      `Сначала привяжите кошелёк, затем подайте заявку на вступление.\n\n` +
-      `Привязка в браузере (подпишите и пришлите мне JSON со страницы):\n${linkUrl}`;
+      `Сначала привяжите кошелёк, затем подайте заявку на вступление` +
+      (channel.inviteLink ? `:\n${channel.inviteLink}` : ".") +
+      `\n\nПривязка в браузере (подпишите и пришлите мне JSON со страницы):\n${linkUrl}`;
     const keyboard = new Keyboard().webApp("Привязать кошелёк", linkUrl);
     if (channel.price > 0n) {
       const subscribeUrl = webAppUrl(miniappUrl, "subscribe", {
