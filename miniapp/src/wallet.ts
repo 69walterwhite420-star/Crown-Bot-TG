@@ -26,6 +26,49 @@ const CONNECT = "standard:connect";
 const SIGN_MESSAGE = "solana:signMessage";
 const SIGN_TRANSACTION = "solana:signTransaction";
 
+/**
+ * The wallet's own injected provider. Wallets take the network from their UI
+ * here — unlike the Wallet Standard path, where several of them ignore the
+ * `chain` field and assume mainnet, rejecting our devnet transactions with a
+ * "network mismatch". So: sign through the provider when it exists.
+ */
+interface LegacyProvider {
+  connect?(): Promise<unknown>;
+  signAllTransactions?(transactions: Transaction[]): Promise<Transaction[]>;
+  signTransaction?(transaction: Transaction): Promise<Transaction>;
+}
+
+function legacyProviderOf(name: string): LegacyProvider | null {
+  const scope = window as unknown as Record<string, LegacyProvider | undefined> & {
+    phantom?: { solana?: LegacyProvider };
+  };
+  const lower = name.toLowerCase();
+  const provider = lower.includes("solflare")
+    ? scope.solflare
+    : lower.includes("phantom")
+      ? scope.phantom?.solana
+      : lower.includes("brave")
+        ? scope.braveSolana
+        : undefined;
+  return provider?.signAllTransactions || provider?.signTransaction ? provider : null;
+}
+
+async function signViaProvider(
+  provider: LegacyProvider,
+  transactions: Transaction[],
+): Promise<Uint8Array[]> {
+  await provider.connect?.();
+  const signed = provider.signAllTransactions
+    ? await provider.signAllTransactions(transactions)
+    : await Promise.all(
+        transactions.map((transaction) => {
+          if (!provider.signTransaction) throw new Error("wallet cannot sign transactions");
+          return provider.signTransaction(transaction);
+        }),
+      );
+  return signed.map((transaction) => new Uint8Array(transaction.serialize()));
+}
+
 export interface DiscoveredWallet {
   name: string;
   icon: string;
@@ -73,6 +116,10 @@ async function connect(
     },
     async signTransactions(transactions) {
       if (transactions.length === 0) return [];
+      // The wallet's own network wins: sign through its injected provider
+      // when there is one; the Standard path is the fallback.
+      const provider = legacyProviderOf(wallet.name);
+      if (provider) return signViaProvider(provider, transactions);
       const outputs = await signTransactionFeature.signTransaction(
         ...transactions.map((transaction) => ({
           account,
