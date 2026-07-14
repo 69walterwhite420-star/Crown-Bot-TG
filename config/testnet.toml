@@ -1,0 +1,26 @@
+# Crown Bot TG — testnet profile.
+#
+# Ключи ровно по docs/bot-spec.md §9. Адреса программ и канистр этот
+# репозиторий не порождает — только копирует из деплоев crown-factory,
+# crown-games/subscription и crown-core. Секреты (BOT_TOKEN, путь к базе)
+# живут только в env.
+
+[chain]
+id             = "solana-devnet"
+rpc            = "https://api.devnet.solana.com"
+factory_stream = "2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv"
+usdc           = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+
+[canisters]
+# Локальная реплика: principal-ы зависят от деплоя и подставляются при
+# запуске сервиса; здесь пусто до постоянного devnet-деплоя канистр.
+subscription = ""
+crown_index  = ""
+
+[policy]
+challenge_ttl   = 300
+rebind_cooldown = 259200
+max_wallets     = 10
+revision_period = 21600
+grace           = 259200
+renew_notice    = 604800

@@ -1,0 +1,18 @@
+# Crown Bot TG — mainnet profile.
+#
+# Те же ключи, что в testnet.toml (docs/bot-spec.md §9). Заполняется при
+# выходе платформы в прод: mainnet-адреса из crown-factory F6 и
+# crown-games/subscription G5, боевые principal-ы канистр.
+
+[chain]
+id = "solana-mainnet"
+
+[canisters]
+
+[policy]
+challenge_ttl   = 300
+rebind_cooldown = 259200
+max_wallets     = 10
+revision_period = 21600
+grace           = 259200
+renew_notice    = 604800

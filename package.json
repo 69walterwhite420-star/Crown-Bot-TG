@@ -1,0 +1,23 @@
+{
+  "name": "crown-bot-tg",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "core",
+    "tg",
+    "miniapp"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p core && tsc -p tg && tsc -p miniapp",
+    "lint": "eslint .",
+    "test": "npm --workspace @crown/core run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@types/node": "^20.19.43",
+    "eslint": "^9",
+    "tsx": "^4",
+    "typescript": "^5",
+    "typescript-eslint": "^8"
+  }
+}

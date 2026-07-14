@@ -1,0 +1,9 @@
+{
+  "name": "@crown/tg",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@crown/core": "*"
+  }
+}
