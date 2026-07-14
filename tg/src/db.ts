@@ -212,6 +212,27 @@ export class BotDb {
     return row ? bindingOf(row as never) : null;
   }
 
+  /** Channels where the account holds at least one active binding. */
+  channelsOfAccount(telegramId: bigint): ChannelRow[] {
+    return this.db
+      .prepare(
+        `SELECT channels.* FROM channels
+         JOIN bindings ON bindings.channel_id = channels.channel_id
+         WHERE bindings.telegram_id = ? AND bindings.unbound_at IS NULL
+         GROUP BY channels.channel_id`,
+      )
+      .all(telegramId)
+      .map((row) => channelOf(row as never));
+  }
+
+  /** Channels owned by the account — the /collect surface. */
+  channelsOwnedBy(telegramId: bigint): ChannelRow[] {
+    return this.db
+      .prepare("SELECT * FROM channels WHERE owner_telegram_id = ?")
+      .all(telegramId)
+      .map((row) => channelOf(row as never));
+  }
+
   activeBindingsOfAccount(channelId: Uint8Array, telegramId: bigint): BindingRow[] {
     return this.db
       .prepare(

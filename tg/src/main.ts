@@ -218,6 +218,63 @@ async function main(): Promise<void> {
     }
   });
 
+  // The owner's collect button: the page finds due chunks and batches
+  // releases; the wallet approves once. The owner pays the gas — his money.
+  bot.command("collect", async (ctx) => {
+    if (ctx.chat.type !== "private" || !ctx.from) return;
+    const owned = db.channelsOwnedBy(BigInt(ctx.from.id));
+    if (owned.length === 0) {
+      await ctx.reply("У вас нет настроенных каналов.");
+      return;
+    }
+    const keyboard = new Keyboard();
+    for (const channel of owned) {
+      keyboard
+        .webApp(
+          `Собрать: канал ${hex(channel.channelId).slice(0, 8)}…`,
+          webAppUrl(miniappUrl, "collect", {
+            channelId: hex(channel.channelId),
+            resolver: hex(channel.resolver),
+            owner: new PublicKey(channel.ownerWallet).toBase58(),
+            price: channel.price.toString(),
+            period: channel.period.toString(),
+            subscription: subscriptionCanisterId,
+            icHost,
+          }),
+        )
+        .row();
+    }
+    await ctx.reply("Сбор созревших кусков:", { reply_markup: keyboard.oneTime() });
+  });
+
+  // The donor's exit: the page finds his live escrow of the channel and
+  // cancels it — the remainder returns at once.
+  bot.command("cancel", async (ctx) => {
+    if (ctx.chat.type !== "private" || !ctx.from) return;
+    const linked = db.channelsOfAccount(BigInt(ctx.from.id));
+    if (linked.length === 0) {
+      await ctx.reply("У вас нет привязанных каналов.");
+      return;
+    }
+    const keyboard = new Keyboard();
+    for (const channel of linked) {
+      keyboard
+        .webApp(
+          `Отменить подписку: канал ${hex(channel.channelId).slice(0, 8)}…`,
+          webAppUrl(miniappUrl, "cancel", {
+            channelId: hex(channel.channelId),
+            resolver: hex(channel.resolver),
+            subscription: subscriptionCanisterId,
+            icHost,
+          }),
+        )
+        .row();
+    }
+    await ctx.reply("Отмена подписки (остаток вернётся мгновенно):", {
+      reply_markup: keyboard.oneTime(),
+    });
+  });
+
   bot.on("chat_join_request", async (ctx) => {
     await service.handleJoinRequest(
       BigInt(ctx.chatJoinRequest.chat.id),

@@ -5,7 +5,7 @@ import { Buffer } from "buffer";
 (globalThis as { Buffer?: typeof Buffer }).Buffer ??= Buffer;
 
 import { PublicKey } from "@solana/web3.js";
-import { fromHex } from "@crown/core";
+import { escrowFilters, findEscrows, fromHex } from "@crown/core";
 
 import { buildContext, chainConfig, parseFragment, solanaChainOf } from "./config.ts";
 import { cancelFlow, collectFlow, linkFlow, subscribeFlow, type WalletSigner } from "./flows.ts";
@@ -140,10 +140,23 @@ async function main(): Promise<void> {
     case "cancel": {
       const context = await buildContext(payload);
       const channelId = fromHex(payload.channelId ?? "");
-      const escrow = new PublicKey(payload.escrow ?? "");
-      say(`Отмена подписки ${escrow.toBase58()}: остаток вернётся мгновенно.`);
+      const resolver = fromHex(payload.resolver ?? "");
+      say("Отмена подписки: остаток вернётся мгновенно.");
       await withWallet(async (wallet) => {
-        const { signature } = await cancelFlow(channelId, escrow, wallet, context);
+        // The page finds the donor's own live escrow of this channel — the
+        // chain is the database of subscriptions.
+        const found = await findEscrows(
+          context.connection,
+          context.addresses.factory,
+          escrowFilters({ donor: wallet.publicKey, resolver }),
+        );
+        const live = found.find((entry) => !entry.escrow.settled);
+        if (!live) {
+          say("Живой подписки на этот канал у кошелька нет.");
+          return;
+        }
+        say(`Эскроу: ${live.address.toBase58()}`);
+        const { signature } = await cancelFlow(channelId, live.address, wallet, context);
         say(`Отменено: ${signature}`);
       });
       break;

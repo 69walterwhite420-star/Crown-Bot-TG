@@ -22,5 +22,8 @@ function chainConfig() {
 
 export default defineConfig({
   define: { __CHAIN_CONFIG__: JSON.stringify(chainConfig()) },
+  // Relative base: the bundle works from any hosting path (asset canister,
+  // GitHub Pages, local preview).
+  base: "./",
   build: { target: "es2022" },
 });
