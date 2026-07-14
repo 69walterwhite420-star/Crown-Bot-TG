@@ -42,4 +42,18 @@ if grep -rEn "from ['\"].*/tg/" miniapp/src/ 2>/dev/null; then
     exit 1
 fi
 
+# 6. The salt vectors are a byte-exact copy of the factory's reference —
+#    the single offchain etalon, itself fuzz-verified against the deployed
+#    program in crown-factory.
+reference="../Crown-Factory/vectors/stream-salt.json"
+if [ ! -f "$reference" ]; then
+    reference=$(mktemp)
+    curl -sf -o "$reference" \
+        https://raw.githubusercontent.com/69walterwhite420-star/Crown-Factory/solana-only/vectors/stream-salt.json
+fi
+if ! cmp -s core/vectors/stream-salt.json "$reference"; then
+    echo "FAIL: core/vectors/stream-salt.json drifted from the factory reference" >&2
+    exit 1
+fi
+
 echo "boundaries OK"

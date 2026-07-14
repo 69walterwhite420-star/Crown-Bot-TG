@@ -173,6 +173,8 @@ id             = "solana-devnet"
 rpc            = "<url>"                        # недоверенная зона: свой RPC разрешён
 factory_stream = "<program id>"                 # из crown-factory deploy/
 usdc           = "<mint>"
+splitter       = "<program id>"                 # для сборки release: инструкция несёт
+treasury       = "<address>"                    #   аккаунты донат-CPI; валидирует их сплиттер
 
 [canisters]
 subscription = "<principal>"                    # crown-games/subscription

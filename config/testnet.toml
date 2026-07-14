@@ -10,6 +10,12 @@ id             = "solana-devnet"
 rpc            = "https://api.devnet.solana.com"
 factory_stream = "2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv"
 usdc           = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+# Сплиттер и казна нужны клиенту, чтобы собрать release: инструкция несёт
+# все аккаунты донат-CPI (splitter_aux_usdc = ATA казны). Значения — из
+# crown-core (config + contracts/solana/deploy.toml); проверяет их сплиттер
+# своими constraints, клиент лишь передаёт.
+splitter       = "3R4dk7uuLt5rnuD95roDhQkt2ZKV9xMAFjfx1Eb96nxP"
+treasury       = "3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE"
 
 [canisters]
 # Локальная реплика: principal-ы зависят от деплоя и подставляются при
