@@ -17,3 +17,15 @@ export function channelId(tgChatId: bigint, ownerWallet: Uint8Array, setupNonce:
   assertLength(ownerWallet, 32, "owner wallet");
   return sha256(concat(utf8(CHANNEL_ID_TAG), i64le(tgChatId), ownerWallet, u64le(setupNonce)));
 }
+
+export const SETUP_SCOPE_TAG = "crown:bot-tg:setup";
+
+/**
+ * The channel field of the OWNER's setup challenge (docs/bot-spec.md §3):
+ * the real channel_id derives from the owner's wallet, which the setup link
+ * is about to learn — so the signature binds to the Telegram chat instead.
+ * setup_scope = sha256("crown:bot-tg:setup" ‖ i64le(tg_chat_id))
+ */
+export function setupScopeId(tgChatId: bigint): Uint8Array {
+  return sha256(concat(utf8(SETUP_SCOPE_TAG), i64le(tgChatId)));
+}

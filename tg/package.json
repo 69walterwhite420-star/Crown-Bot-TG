@@ -4,6 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "dependencies": {
-    "@crown/core": "*"
+    "@crown/core": "*",
+    "@noble/curves": "^2.2.0",
+    "better-sqlite3": "^12.11.1",
+    "grammy": "^1.44.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13"
+  },
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts"
   }
 }

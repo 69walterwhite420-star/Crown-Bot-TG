@@ -23,6 +23,11 @@ treasury       = "3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE"
 subscription = ""
 crown_index  = ""
 
+[service]
+# Страница мини-аппа (Telegram требует HTTPS в проде; локальная разработка —
+# vite dev server). В прод-профиле — asset-канистра.
+miniapp_url = "http://localhost:5173"
+
 [policy]
 challenge_ttl   = 300
 rebind_cooldown = 259200

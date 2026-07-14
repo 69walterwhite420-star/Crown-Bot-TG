@@ -10,7 +10,7 @@
   "scripts": {
     "typecheck": "tsc -p core && tsc -p tg && tsc -p miniapp",
     "lint": "eslint .",
-    "test": "npm --workspace @crown/core run test"
+    "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@eslint/js": "^9",
