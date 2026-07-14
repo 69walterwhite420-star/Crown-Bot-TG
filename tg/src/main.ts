@@ -27,7 +27,10 @@ function configValue(toml: string, key: string): string {
 function webAppUrl(base: string, action: string, payload: Record<string, string>): string {
   const json = JSON.stringify(payload);
   const b64 = Buffer.from(json).toString("base64url");
-  return `${base}#${action}=${b64}`;
+  // The cache buster: Pages/CDN caches index.html; a fresh query string
+  // guarantees every link serves the current build.
+  const versioned = base.includes("?") ? base : `${base}?v=${Date.now()}`;
+  return `${versioned}#${action}=${b64}`;
 }
 
 async function main(): Promise<void> {
