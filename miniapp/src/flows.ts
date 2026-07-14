@@ -4,7 +4,7 @@
 // verifier drives the very same code with file keypairs.
 
 import type { Connection } from "@solana/web3.js";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction } from "@solana/spl-token";
 import { Principal } from "@dfinity/principal";
 import {
@@ -228,11 +228,13 @@ export async function collectFlow(
   context: FlowContext,
 ): Promise<{ released: DueChunk[]; signatures: string[] }> {
   const due = await findDueChunks(channel, context);
-  const transactions: Transaction[] = [];
-  const latest =
-    due.length > 0
-      ? await withRetry("blockhash", () => context.connection.getLatestBlockhash())
-      : null;
+  if (due.length === 0) return { released: [], signatures: [] };
+
+  // First every canister signature — threshold signing takes seconds per
+  // chunk. Only then the blockhash: wallets judge a transaction's cluster by
+  // its blockhash, and a stale one reads to them as "foreign network".
+  const payer = new PublicKey(wallet.publicKey);
+  const prepared_: { chunk: DueChunk; instructions: TransactionInstruction[] }[] = [];
   for (const chunk of due) {
     // The account came with the discovery call; refetching it per chunk is
     // exactly what makes a public RPC start refusing the burst.
@@ -253,13 +255,11 @@ export async function collectFlow(
     // Recipient ATAs may not exist yet (a first-ever payout); idempotent
     // creation rides in front — the ed25519 entry must stay DIRECTLY before
     // release, that is the form's law.
-    if (!latest) break;
-    const transaction = prepared(wallet.publicKey, latest);
-    const payer = new PublicKey(wallet.publicKey);
+    const instructions: TransactionInstruction[] = [];
     escrow.recipients.forEach((recipient, position) => {
       if (escrow.shares[position] === 0) return;
       const owner = new PublicKey(recipient);
-      transaction.add(
+      instructions.push(
         createAssociatedTokenAccountIdempotentInstruction(
           payer,
           ata(owner, context.addresses.usdc),
@@ -268,15 +268,22 @@ export async function collectFlow(
         ),
       );
     });
-    transaction
-      .add(ed25519VerifyIx(escrow.resolver, signed.Ok.signature, message))
-      .add(releaseIx(chunk.escrow, escrow, chunk.index, context.addresses));
-    transactions.push(transaction);
+    instructions.push(ed25519VerifyIx(escrow.resolver, signed.Ok.signature, message));
+    instructions.push(releaseIx(chunk.escrow, escrow, chunk.index, context.addresses));
+    prepared_.push({ chunk, instructions });
   }
+
+  const latest = await withRetry("blockhash", () => context.connection.getLatestBlockhash());
+  const transactions = prepared_.map((entry) => {
+    const transaction = prepared(wallet.publicKey, latest);
+    for (const instruction of entry.instructions) transaction.add(instruction);
+    return transaction;
+  });
+
   const wires = await wallet.signTransactions(transactions);
   const signatures: string[] = [];
   for (const wire of wires) {
-    signatures.push(await sendSigned(context, wire, latest ?? undefined));
+    signatures.push(await sendSigned(context, wire, latest));
   }
   return { released: due, signatures };
 }

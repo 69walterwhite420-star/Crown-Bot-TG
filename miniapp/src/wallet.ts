@@ -116,10 +116,15 @@ async function connect(
     },
     async signTransactions(transactions) {
       if (transactions.length === 0) return [];
-      // The wallet's own network wins: sign through its injected provider
-      // when there is one; the Standard path is the fallback.
-      const provider = legacyProviderOf(wallet.name);
-      if (provider) return signViaProvider(provider, transactions);
+      // Standard first: it is the only path that names the cluster, and
+      // wallets refuse to sign a transaction whose cluster they guess wrong.
+      // The injected provider (no chain field, mainnet by default) is the
+      // fallback for wallets without the Standard signing feature.
+      if (!signTransactionFeature) {
+        const provider = legacyProviderOf(wallet.name);
+        if (!provider) throw new Error("wallet cannot sign transactions");
+        return signViaProvider(provider, transactions);
+      }
       const outputs = await signTransactionFeature.signTransaction(
         ...transactions.map((transaction) => ({
           account,
