@@ -42,6 +42,9 @@ export interface FlowContext {
   /** "crown:stream:<chainId>" — the shape's message domain. */
   domain: string;
   addresses: ChainAddresses;
+  /** The platform's price tag — birth fields of every subscription escrow. */
+  feeBps: number;
+  feeWallet: Uint8Array;
   subscription: SubscriptionActor;
   subscriptionCanisterId: string;
 }
@@ -163,6 +166,8 @@ export async function subscribeFlow(
       t0,
       period: channel.policy.period,
       resolver: channel.resolver,
+      feeBps: context.feeBps,
+      feeWallet: context.feeWallet,
       nonce: t0,
     };
     const { instruction, escrow } = createEscrowIx(birth, context.addresses);

@@ -86,11 +86,12 @@ async function main(): Promise<void> {
     chainId: "solana-devnet",
     domain: "crown:stream:solana-devnet",
     addresses: {
-      factory: new PublicKey("2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv"),
+      factory: new PublicKey("57MpCQ3TfAE66qDAnfkP9AX7LRqwd4CNX8uN6DaVwm3V"),
       usdc: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
-      splitter: new PublicKey("3R4dk7uuLt5rnuD95roDhQkt2ZKV9xMAFjfx1Eb96nxP"),
-      treasury: new PublicKey("3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE"),
+      splitter: new PublicKey("DDSeyx684iU9agHbXExwS3NstLvQeLKZcJWcJFSh1VDA"),
     } satisfies ChainAddresses,
+    feeBps: 300,
+    feeWallet: new PublicKey("3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE").toBytes(),
     subscription: subscriptionActor(agent, subscriptionCanisterId),
     subscriptionCanisterId,
   };

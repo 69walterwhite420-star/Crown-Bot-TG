@@ -36,7 +36,6 @@ export interface ChainAddresses {
   factory: PublicKey;
   usdc: PublicKey;
   splitter: PublicKey;
-  treasury: PublicKey;
 }
 
 export function ata(owner: PublicKey, mint: PublicKey): PublicKey {
@@ -113,6 +112,8 @@ export function createEscrowIx(
     i64le(birth.t0),
     i64le(birth.period),
     birth.resolver,
+    u16le(birth.feeBps),
+    birth.feeWallet,
     u64le(birth.nonce),
   );
   const instruction = new TransactionInstruction({
@@ -143,18 +144,21 @@ function splitterEventAuthority(splitter: PublicKey): PublicKey {
  */
 export function releaseIx(
   escrow: PublicKey,
-  state: Pick<EscrowAccount, "donor" | "recipients" | "shares">,
+  state: Pick<EscrowAccount, "donor" | "recipients" | "shares" | "feeWallet">,
   index: number,
   chain: ChainAddresses,
 ): TransactionInstruction {
   const donor = new PublicKey(state.donor);
+  // The fee leaves to the ATA of the wallet the escrow itself was born
+  // with; the program pins the address, this list only supplies it.
+  const feeWallet = new PublicKey(state.feeWallet);
   const keys = [
     { pubkey: escrow, isSigner: false, isWritable: true },
     { pubkey: chain.usdc, isSigner: false, isWritable: false },
     { pubkey: ata(escrow, chain.usdc), isSigner: false, isWritable: true },
     { pubkey: donor, isSigner: false, isWritable: true },
     { pubkey: ata(donor, chain.usdc), isSigner: false, isWritable: true },
-    { pubkey: ata(chain.treasury, chain.usdc), isSigner: false, isWritable: true },
+    { pubkey: ata(feeWallet, chain.usdc), isSigner: false, isWritable: true },
     { pubkey: splitterEventAuthority(chain.splitter), isSigner: false, isWritable: false },
     { pubkey: chain.splitter, isSigner: false, isWritable: false },
     { pubkey: SYSVAR_INSTRUCTIONS_PUBKEY, isSigner: false, isWritable: false },

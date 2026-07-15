@@ -85,6 +85,9 @@ class FakeSources implements Sources {
   }
 }
 
+const FEE_BPS = 300;
+const FEE_WALLET = new Uint8Array(32).fill(0x5f);
+
 function escrowOf(donor: Uint8Array, t0: bigint, nChunks: number): EscrowAccount {
   return {
     donor,
@@ -95,6 +98,8 @@ function escrowOf(donor: Uint8Array, t0: bigint, nChunks: number): EscrowAccount
     released: 0,
     t0,
     period: PERIOD,
+    feeBps: FEE_BPS,
+    feeWallet: FEE_WALLET,
     bump: 0,
     settled: false,
     recipients: [OWNER_WALLET.pub],
@@ -118,6 +123,8 @@ function makeDeps(dbPath = ":memory:") {
       chainId: "solana-devnet",
       botUsername: "test_bot",
       rebindCooldown: 1_000n,
+      feeBps: FEE_BPS,
+      feeWallet: FEE_WALLET,
       maxWallets: 2,
       grace: 50n,
       renewNotice: 30n,

@@ -1,7 +1,7 @@
 // The decoder against a REAL devnet account, born by the deployed stream
-// program during the subscription game's G4 e2e. The strongest cross-check
-// ties everything together: recompute the salt from the decoded fields and
-// the address must equal the account's own address.
+// program during the subscription game's e2e (2026-07-15, the fee-bearing
+// shape). The strongest cross-check ties everything together: the PDA of
+// the stored salt must equal the account's own address.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -12,7 +12,7 @@ import { hex } from "../src/bytes.ts";
 import { decodeEscrow, RESOLVER_OFFSET, DONOR_OFFSET } from "../src/escrow-account.ts";
 import { escrowAddress } from "../src/escrow-address.ts";
 
-const FACTORY = new PublicKey("2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv");
+const FACTORY = new PublicKey("57MpCQ3TfAE66qDAnfkP9AX7LRqwd4CNX8uN6DaVwm3V");
 
 interface Fixture {
   address: string;
@@ -35,6 +35,11 @@ test("the real devnet escrow decodes to its e2e birth", () => {
   assert.equal(escrow.nChunks, 3);
   assert.equal(escrow.released, 2);
   assert.equal(escrow.period, 45n);
+  assert.equal(escrow.feeBps, 300, "the platform's price tag, born with the escrow");
+  assert.equal(
+    hex(escrow.feeWallet),
+    hex(new PublicKey("3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE").toBytes()),
+  );
   assert.equal(escrow.settled, true, "cancelled by the donor in the e2e");
   assert.equal(escrow.recipients.length, 1);
   assert.deepEqual(escrow.shares, [10_000]);

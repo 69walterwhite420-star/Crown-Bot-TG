@@ -18,6 +18,8 @@ interface Vector {
   t0: string;
   period: string;
   resolver_hex: string;
+  fee_bps: number;
+  fee_wallet_hex: string;
   nonce: string;
   salt_hex: string;
 }
@@ -46,6 +48,8 @@ test("every factory salt vector passes", () => {
       t0: BigInt(vector.t0),
       period: BigInt(vector.period),
       resolver: fromHex(vector.resolver_hex),
+      feeBps: vector.fee_bps,
+      feeWallet: fromHex(vector.fee_wallet_hex),
       nonce: BigInt(vector.nonce),
     });
     assert.equal(hex(salt), vector.salt_hex);
@@ -62,6 +66,8 @@ test("every birth field separates the salt", () => {
     t0: 3n,
     period: 4n,
     resolver: new Uint8Array(32).fill(0x33),
+    feeBps: 6,
+    feeWallet: new Uint8Array(32).fill(0x44),
     nonce: 5n,
   };
   const reference = hex(streamSalt(base));
@@ -74,6 +80,8 @@ test("every birth field separates the salt", () => {
     { ...base, t0: 4n },
     { ...base, period: 5n },
     { ...base, resolver: new Uint8Array(32).fill(0x34) },
+    { ...base, feeBps: 7 },
+    { ...base, feeWallet: new Uint8Array(32).fill(0x45) },
     { ...base, nonce: 6n },
   ];
   for (const variant of variants) {

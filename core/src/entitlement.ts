@@ -9,12 +9,18 @@ import type { EscrowAccount } from "./escrow-account.ts";
 export interface ChannelPolicy {
   /** The owner's wallet — the recipient of every subscription. */
   owner: Uint8Array;
-  /** Minor units of USDC per period; 0 = subscriptions disabled. */
+  /** Minor units of USDC per period — the chunk the donor pays; the owner
+   *  receives it net of the platform fee. 0 = subscriptions disabled. */
   price: bigint;
   /** Seconds; the exact period a subscription escrow must carry. */
   period: bigint;
   /** Minor units of reputation; 0 = the reputation gate is disabled. */
   threshold: bigint;
+  /** The platform's price tag: the exact fee fields a subscription escrow
+   *  must be born with. A foreign-fee escrow shares the resolver key but
+   *  never gets release signatures, so it must not buy admission either. */
+  feeBps: number;
+  feeWallet: Uint8Array;
 }
 
 /** The full row of the subscription shape: one recipient, the whole chunk. */
@@ -45,6 +51,8 @@ export function subscriptionAlive(
     bytesEqual(escrow.recipients[0], policy.owner) &&
     escrow.shares.length === 1 &&
     escrow.shares[0] === FULL_SHARE &&
+    escrow.feeBps === policy.feeBps &&
+    bytesEqual(escrow.feeWallet, policy.feeWallet) &&
     escrow.chunk >= policy.price &&
     escrow.period === policy.period &&
     !escrow.settled &&

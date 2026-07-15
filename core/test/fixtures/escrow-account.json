@@ -1,6 +1,6 @@
 {
-  "address": "9bSRKefBT7ABMGDmK3dqBDnCHofJVKMJiWE7G1V9HzQf",
-  "note": "stream escrow born by the subscription G4 e2e on devnet, 2026-07-14: chunk=40000, n_chunks=3, released=2, settled (cancel); never closed by construction",
-  "owner": "2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv",
-  "data_base64": "H9V7u7oW2psXl21oynUIdgvlXIJPGyMQuNxq/BVKu+P7iaDwEmhBZigTyp12lpBB/HpjXPVKD83LZluAM2iKpPcDE0JiSwi3wRzSkB0ixPP5aK6trbKYTp3Z9YDWuWBtecDQBKklo+5AnAAAAAAAAAMAAgBrClZqAAAAAC0AAAAAAAAA/wEBAAAA6/JSxj3/c/bUcBVaieFLWA7gx9NZcOuVs2aZA2ImeJcBAAAAECc="
+  "address": "BcF8ZkCHCyjMZ2gZ6qKv5TnyjQUZX67DDSFxXAfSsu1k",
+  "note": "stream escrow born by the subscription G4 e2e on devnet, 2026-07-15: chunk=40000, n_chunks=3, released=2, fee 300 bps to the platform wallet, settled (cancel); never closed by construction",
+  "owner": "57MpCQ3TfAE66qDAnfkP9AX7LRqwd4CNX8uN6DaVwm3V",
+  "data_base64": "H9V7u7oW2psXl21oynUIdgvlXIJPGyMQuNxq/BVKu+P7iaDwEmhBZmkNxAgrmbvoOTDefRwaQAo42k8/I94AqAxxDVSodJZ7CMQgALcJBkkxeeMwjINEQxYPvY/SXPlTfP7Bqsl/5eBAnAAAAAAAAAMAAgATbldqAAAAAC0AAAAAAAAALAEocfOhzKOL1aGPWz9MkCw3aD87/AzoSPSAPuUtdH5l5f0BAQAAAOvyUsY9/3P21HAVWonhS1gO4MfTWXDrlbNmmQNiJniXAQAAABAn"
 }

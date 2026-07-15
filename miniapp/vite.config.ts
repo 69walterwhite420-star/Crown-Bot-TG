@@ -14,7 +14,8 @@ function chainConfig() {
     factory: value("factory_stream"),
     usdc: value("usdc"),
     splitter: value("splitter"),
-    treasury: value("treasury"),
+    feeBps: Number(value("fee_bps")),
+    feeWallet: value("fee_wallet"),
     subscription: value("subscription"),
     crownIndex: value("crown_index"),
   };

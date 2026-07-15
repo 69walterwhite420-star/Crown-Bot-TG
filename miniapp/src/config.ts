@@ -15,7 +15,8 @@ declare const __CHAIN_CONFIG__: {
   factory: string;
   usdc: string;
   splitter: string;
-  treasury: string;
+  feeBps: number;
+  feeWallet: string;
   subscription: string;
   crownIndex: string;
 };
@@ -50,7 +51,6 @@ export async function buildContext(payload: Record<string, string>): Promise<Flo
     factory: new PublicKey(config.factory),
     usdc: new PublicKey(config.usdc),
     splitter: new PublicKey(config.splitter),
-    treasury: new PublicKey(config.treasury),
   };
   const subscriptionCanisterId = overridable(config.subscription, payload.subscription, "subscription canister");
   const host = overridable("", payload.icHost, "") || "https://icp-api.io";
@@ -63,6 +63,8 @@ export async function buildContext(payload: Record<string, string>): Promise<Flo
     chainId: config.chainId,
     domain: `crown:stream:${config.chainId}`,
     addresses,
+    feeBps: config.feeBps,
+    feeWallet: new PublicKey(config.feeWallet).toBytes(),
     subscription: subscriptionActor(agent, subscriptionCanisterId),
     subscriptionCanisterId,
   };

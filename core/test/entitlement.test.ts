@@ -10,12 +10,16 @@ import type { EscrowAccount } from "../src/escrow-account.ts";
 const OWNER = new Uint8Array(32).fill(0x01);
 const DONOR = new Uint8Array(32).fill(0x02);
 const RESOLVER = new Uint8Array(32).fill(0x03);
+const FEE_WALLET = new Uint8Array(32).fill(0x04);
+const FEE_BPS = 300;
 
 const policy: ChannelPolicy = {
   owner: OWNER,
   price: 40_000n,
   period: 2_592_000n,
   threshold: 500_000n,
+  feeBps: FEE_BPS,
+  feeWallet: FEE_WALLET,
 };
 
 function aliveEscrow(overrides: Partial<EscrowAccount> = {}): EscrowAccount {
@@ -28,6 +32,8 @@ function aliveEscrow(overrides: Partial<EscrowAccount> = {}): EscrowAccount {
     released: 0,
     t0: 1_000n,
     period: policy.period,
+    feeBps: FEE_BPS,
+    feeWallet: FEE_WALLET,
     bump: 254,
     settled: false,
     recipients: [OWNER],
@@ -60,6 +66,8 @@ test("every violated condition kills the subscription", () => {
     ["two recipients", aliveEscrow({ recipients: [OWNER, DONOR], shares: [5000, 5000] })],
     ["partial share", aliveEscrow({ shares: [9_999] })],
     ["under price", aliveEscrow({ chunk: 39_999n })],
+    ["foreign fee bps", aliveEscrow({ feeBps: 0 })],
+    ["foreign fee wallet", aliveEscrow({ feeWallet: new Uint8Array(32).fill(9) })],
     ["wrong period", aliveEscrow({ period: policy.period + 1n })],
     ["terminal", aliveEscrow({ settled: true })],
   ];

@@ -94,6 +94,8 @@ async function main(): Promise<void> {
       maxWallets: Number(policyNumber("max_wallets")),
       grace: policyNumber("grace"),
       renewNotice: policyNumber("renew_notice"),
+      feeBps: Number(configValue(toml, "fee_bps")),
+      feeWallet: new PublicKey(configValue(toml, "fee_wallet")).toBytes(),
     },
   });
 

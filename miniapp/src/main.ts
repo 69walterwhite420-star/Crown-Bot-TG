@@ -101,6 +101,8 @@ async function main(): Promise<void> {
           price: BigInt(payload.price ?? "0"),
           period: BigInt(payload.period ?? "0"),
           threshold: 0n,
+          feeBps: context.feeBps,
+          feeWallet: context.feeWallet,
         },
       };
       say(`Подписка: ${payload.price} за период ${payload.period} с.`);
@@ -127,6 +129,8 @@ async function main(): Promise<void> {
           price: BigInt(payload.price ?? "0"),
           period: BigInt(payload.period ?? "0"),
           threshold: 0n,
+          feeBps: context.feeBps,
+          feeWallet: context.feeWallet,
         },
       };
       await withWallet(async (wallet) => {

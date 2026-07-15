@@ -19,12 +19,16 @@ export interface StreamBirth {
   t0: bigint;
   period: bigint;
   resolver: Uint8Array;
+  /** The resolver operator's price tag — birth fields like the rest. */
+  feeBps: number;
+  feeWallet: Uint8Array;
   nonce: bigint;
 }
 
 /**
  * salt = sha256(donor ‖ K(u8) ‖ recipients ‖ shares(u16 LE) ‖ chunk_le ‖
- * n_chunks_le ‖ t0_le ‖ period_le ‖ resolver ‖ nonce_le)
+ * n_chunks_le ‖ t0_le ‖ period_le ‖ resolver ‖ fee_bps_le ‖ fee_wallet ‖
+ * nonce_le)
  */
 export function streamSalt(birth: StreamBirth): Uint8Array {
   assertLength(birth.donor, 32, "donor");
@@ -42,6 +46,9 @@ export function streamSalt(birth: StreamBirth): Uint8Array {
   parts.push(i64le(birth.t0));
   parts.push(i64le(birth.period));
   parts.push(birth.resolver);
+  assertLength(birth.feeWallet, 32, "feeWallet");
+  parts.push(u16le(birth.feeBps));
+  parts.push(birth.feeWallet);
   parts.push(u64le(birth.nonce));
   return sha256(concat(...parts));
 }

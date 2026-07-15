@@ -21,11 +21,12 @@ import {
 } from "../src/instructions.ts";
 
 const CHAIN: ChainAddresses = {
-  factory: new PublicKey("2pezd2u8LFMFULRzV2ygdRmH6BNxxU4AoeD8RSGgCdxv"),
+  factory: new PublicKey("57MpCQ3TfAE66qDAnfkP9AX7LRqwd4CNX8uN6DaVwm3V"),
   usdc: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
-  splitter: new PublicKey("3R4dk7uuLt5rnuD95roDhQkt2ZKV9xMAFjfx1Eb96nxP"),
-  treasury: new PublicKey("3it64t7KXNip1C1BRYNh8ygeKyujWnaQrPSj3hV9TWbE"),
+  splitter: new PublicKey("DDSeyx684iU9agHbXExwS3NstLvQeLKZcJWcJFSh1VDA"),
 };
+const FEE_WALLET = new Uint8Array(32).fill(0x55);
+const FEE_BPS = 300;
 const DOMAIN = "crown:stream:solana-devnet";
 
 test("discriminators equal their anchor derivation", () => {
@@ -95,6 +96,8 @@ test("create_escrow carries the borsh birth and derives the address", () => {
     t0: -100n,
     period: 45n,
     resolver,
+    feeBps: FEE_BPS,
+    feeWallet: FEE_WALLET,
     nonce: 7n,
   };
   const { instruction, escrow } = createEscrowIx(birth, CHAIN);
@@ -110,6 +113,8 @@ test("create_escrow carries the borsh birth and derives the address", () => {
     i64le(-100n),
     i64le(45n),
     resolver,
+    u16le(FEE_BPS),
+    FEE_WALLET,
     u64le(7n),
   );
   assert.equal(hex(new Uint8Array(instruction.data)), hex(expectedData));
@@ -129,6 +134,7 @@ test("release appends one [recipient, ata] pair per nonzero share", () => {
     donor: new Uint8Array(32).fill(0x11),
     recipients: [new Uint8Array(32).fill(0x22), new Uint8Array(32).fill(0x44)],
     shares: [9_000, 0],
+    feeWallet: FEE_WALLET,
   };
   const ix = releaseIx(escrow, state, 1, CHAIN);
   assert.equal(hex(new Uint8Array(ix.data)), hex(concat(DISCRIMINATORS.release, u16le(1))));

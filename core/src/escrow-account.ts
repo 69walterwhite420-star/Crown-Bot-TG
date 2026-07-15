@@ -22,6 +22,9 @@ export interface EscrowAccount {
   released: number;
   t0: bigint;
   period: bigint;
+  /** The resolver operator's price tag, born with the escrow. */
+  feeBps: number;
+  feeWallet: Uint8Array;
   bump: number;
   /** Terminal: cancel, refund, or the last chunk released. */
   settled: boolean;
@@ -55,6 +58,9 @@ export function decodeEscrow(data: Uint8Array): EscrowAccount {
   offset += 8;
   const period = view.getBigInt64(offset, true);
   offset += 8;
+  const feeBps = view.getUint16(offset, true);
+  offset += 2;
+  const feeWallet = take(32);
   const bump = view.getUint8(offset);
   offset += 1;
   const settled = view.getUint8(offset) !== 0;
@@ -83,6 +89,8 @@ export function decodeEscrow(data: Uint8Array): EscrowAccount {
     released,
     t0,
     period,
+    feeBps,
+    feeWallet,
     bump,
     settled,
     recipients,

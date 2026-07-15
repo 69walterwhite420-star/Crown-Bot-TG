@@ -32,6 +32,10 @@ export interface Policy {
   maxWallets: number;
   grace: bigint;
   renewNotice: bigint;
+  /** The platform's price tag: the fee fields every admission-worthy
+   *  subscription escrow must be born with. */
+  feeBps: number;
+  feeWallet: Uint8Array;
 }
 
 export interface ServiceDeps {
@@ -43,12 +47,14 @@ export interface ServiceDeps {
   policy: Policy;
 }
 
-function policyOf(channel: ChannelRow): ChannelPolicy {
+function policyOf(channel: ChannelRow, platform: Policy): ChannelPolicy {
   return {
     owner: channel.ownerWallet,
     price: channel.price,
     period: channel.period,
     threshold: channel.threshold,
+    feeBps: platform.feeBps,
+    feeWallet: platform.feeWallet,
   };
 }
 
@@ -239,7 +245,7 @@ export class Service {
           subscriptionAlive(escrow, {
             donor: escrow.donor,
             resolver: channel.resolver,
-            policy: policyOf(channel),
+            policy: policyOf(channel, this.deps.policy),
             now,
           })
         ) {
