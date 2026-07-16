@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { concat, fromHex, hex, lp, u32le, utf8 } from "../src/bytes.ts";
+import { concat, fromHex, hex, lp, utf8 } from "../src/bytes.ts";
 import { cancelAuthorization } from "../src/cancel-authorization.ts";
 import { buildChallenge } from "../src/challenge.ts";
 import { channelId } from "../src/channel-id.ts";
@@ -47,25 +47,38 @@ test("the challenge layout is pinned", () => {
   );
 });
 
-// Mirrors the canister's cancel_authorization_layout_is_pinned test:
-// chain "solana-devnet", canister [0xAA, 0xBB], escrow [0xCC; 3].
-test("the cancel authorization mirrors the canister byte for byte", () => {
+// Mirrors the canister's cancel_authorization_is_pinned test (crown-games/
+// subscription, canister/src/auth.rs): the same chain, canister and escrow
+// must render the same text here, or no signature this client makes will be
+// accepted.
+test("the cancel authorization mirrors the canister's text", () => {
   const message = cancelAuthorization(
     "solana-devnet",
-    new Uint8Array([0xaa, 0xbb]),
-    new Uint8Array([0xcc, 0xcc, 0xcc]),
+    "vg3po-ix777-77774-qaafa-cai",
+    new Uint8Array(32).fill(0xcc),
   );
-  const expected = concat(
-    utf8("crown:subscription:v1"),
-    u32le(13),
-    utf8("solana-devnet"),
-    u32le(2),
-    new Uint8Array([0xaa, 0xbb]),
-    u32le(3),
-    new Uint8Array([0xcc, 0xcc, 0xcc]),
-    new Uint8Array([0]),
+  assert.equal(
+    new TextDecoder().decode(message),
+    "crown:subscription:v1\n" +
+      "action: cancel\n" +
+      "chain: solana-devnet\n" +
+      "canister: vg3po-ix777-77774-qaafa-cai\n" +
+      // base58 of [0xCC; 32], the same constant the canister test pins.
+      "escrow: EnTJCS15dqbDTU2XywYSMaScoPv4Py4GzExrtY9DQxoD\n",
   );
-  assert.equal(hex(message), hex(expected));
+});
+
+// The reason it is text at all: Phantom checks isValidUTF8 over the payload
+// and refuses everything else with "You cannot sign solana transactions using
+// sign message" — with the old binary layout the donor could not cancel.
+test("the cancel authorization is valid UTF-8", () => {
+  const message = cancelAuthorization(
+    "solana-devnet",
+    "vg3po-ix777-77774-qaafa-cai",
+    new Uint8Array(32).fill(0xff),
+  );
+  const decoded = new TextDecoder("utf-8", { fatal: true }).decode(message);
+  assert.equal(hex(utf8(decoded)), hex(message));
 });
 
 test("lp framing is injective", () => {

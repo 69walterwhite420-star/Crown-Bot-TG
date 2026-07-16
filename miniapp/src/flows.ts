@@ -6,7 +6,6 @@
 import type { Connection } from "@solana/web3.js";
 import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { createAssociatedTokenAccountIdempotentInstruction } from "@solana/spl-token";
-import { Principal } from "@dfinity/principal";
 import {
   ata,
   cancelAuthorization,
@@ -314,7 +313,7 @@ export async function cancelFlow(
 
   const authorization = cancelAuthorization(
     context.chainId,
-    Principal.fromText(context.subscriptionCanisterId).toUint8Array(),
+    context.subscriptionCanisterId,
     escrowAddress.toBytes(),
   );
   const walletSignature = await wallet.signMessage(authorization);
