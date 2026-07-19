@@ -49,7 +49,7 @@ reference="../Crown-Factory/vectors/stream-salt.json"
 if [ ! -f "$reference" ]; then
     reference=$(mktemp)
     curl -sf -o "$reference" \
-        https://raw.githubusercontent.com/69walterwhite420-star/Crown-Factory/solana-only/vectors/stream-salt.json
+        https://raw.githubusercontent.com/bocchisan/Crown-Factory/solana-only/vectors/stream-salt.json
 fi
 if ! cmp -s core/vectors/stream-salt.json "$reference"; then
     echo "FAIL: core/vectors/stream-salt.json drifted from the factory reference" >&2
